@@ -20,6 +20,7 @@ pub enum Error {
 /// return Ok(true) if verification is successful, otherwise return false.
 ///
 /// Currently only the default pbkdf2_sha256 algorithm is supported.
+///
 /// # Usage
 ///
 /// ```rust
@@ -32,6 +33,7 @@ pub enum Error {
 ///
 /// assert!(res);
 /// ```
+///
 pub fn django_auth(password: &str, encoded_password: &str) -> Result<bool> {
     // split hashed_password into 4 parts: algorithm, iterations, salt, hash
     let parts = encoded_password.split('$');
@@ -57,7 +59,7 @@ pub fn django_auth(password: &str, encoded_password: &str) -> Result<bool> {
     Ok(encoded == encoded_password)
 }
 
-/// Encode `password` in Django way.
+/// Encode `password` in [Django way][1].
 ///
 /// # Usage
 ///
@@ -71,8 +73,11 @@ pub fn django_auth(password: &str, encoded_password: &str) -> Result<bool> {
 ///     encoded_password,
 ///     "pbkdf2_sha256$180000$btQDcwXF2RoK6Q$D4cC7bgbaIZGHsTdw9TYhRfuLfLGbsZlI4Rp802e7kU="
 /// );
-
-/// django_auth(password, &encoded_password).expect("auth failed");
+/// let res = django_auth(password, &encoded_password).expect("auth failed");
+/// assert!(res);
+/// ```
+///
+/// [1]: https://docs.djangoproject.com/en/5.0/topics/auth/passwords/
 ///
 pub fn django_encode_password(password: &str, salt: &str, mut iterations: u32) -> Result<String> {
     if salt.contains('$') {
@@ -124,7 +129,8 @@ mod tests {
             encoded_password,
             "pbkdf2_sha256$180000$btQDcwXF2RoK6Q$D4cC7bgbaIZGHsTdw9TYhRfuLfLGbsZlI4Rp802e7kU="
         );
-        django_auth(password, &encoded_password).expect("auth failed");
+        let res = django_auth(password, &encoded_password).expect("auth failed");
+        assert!(res);
 
         let password = "hello";
         let res = django_encode_password(password, "btQDcwXF$2RoK6Q", 0);
