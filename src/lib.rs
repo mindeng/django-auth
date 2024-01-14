@@ -1,7 +1,20 @@
-use anyhow::{format_err, Ok, Result};
 use base64::prelude::*;
 use pbkdf2::pbkdf2_hmac_array;
 use sha2::Sha256;
+
+type Result<T> = std::result::Result<T, Error>;
+
+#[derive(thiserror::Error, Debug)]
+pub enum Error {
+    #[error("invalid django-style encoded password: {0}")]
+    InvalidEncodedPassword(String),
+
+    #[error("unsupported algorithm: {0}")]
+    UnsupportedAlgorithm(String),
+
+    #[error("invalid salt: {0}")]
+    InvalidSalt(String),
+}
 
 /// Verify `password` based on `encoded_password` which is managed by Django,
 /// return Ok(true) if verification is successful, otherwise return false.
@@ -25,13 +38,15 @@ pub fn django_auth(password: &str, encoded_password: &str) -> Result<bool> {
 
     let parts: Vec<&str> = parts.take(4).collect();
     if parts.len() != 4 {
-        return Err(format_err!("invalid django hashed password"));
+        return Err(Error::InvalidEncodedPassword(
+            "encoded password should have 4 components separated by '$'".to_owned(),
+        ));
     }
 
     let (algorithm, iterations, salt) = (parts[0], parts[1], parts[2]);
 
     if algorithm != "pbkdf2_sha256" {
-        return Err(format_err!("algorithm {algorithm} is not supported"));
+        return Err(Error::UnsupportedAlgorithm(algorithm.to_owned()));
     }
 
     let iterations: u32 = iterations
@@ -61,7 +76,7 @@ pub fn django_auth(password: &str, encoded_password: &str) -> Result<bool> {
 ///
 pub fn django_encode_password(password: &str, salt: &str, mut iterations: u32) -> Result<String> {
     if salt.contains('$') {
-        return Err(format_err!("salt contains dollar sign ($)"));
+        return Err(Error::InvalidSalt("salt contains dollar sign ($)".into()));
     }
 
     if iterations == 0 {
