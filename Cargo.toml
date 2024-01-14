@@ -2,6 +2,10 @@
 name = "django-auth"
 version = "0.1.0"
 edition = "2021"
+license-file = "LICENSE"
+description = "Authenticate or generate Django-managed passwords"
+homepage = "https://github.com/mindeng/django-auth"
+repository = "https://github.com/mindeng/django-auth"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -10,3 +14,5 @@ pbkdf2 = "0.12"
 sha2 = "0.10"
 base64 = "0.21"
 thiserror = "1.0"
+
+[package.metadata.playground]
