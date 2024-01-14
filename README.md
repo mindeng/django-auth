@@ -13,7 +13,7 @@ See [Password management in Django][1] for more information.
 
 See:
 
-- [docs.rs](https://docs.rs/clap/latest/django-auth/)
+- [docs.rs](https://docs.rs/django-auth/latest/)
 - [examples](examples/)
 
 ## CLI Tool Usage
